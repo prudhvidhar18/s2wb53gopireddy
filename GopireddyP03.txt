@@ -1,0 +1,45 @@
+-- SQL Assignment 03
+-- Prudhvidhar Reddy Gopireddy
+
+use clearwater;
+
+--1 
+SELECT cust_order.order_id,cust_order.order_date,cust_order.meth_pmt,customer.first,customer.last FROM cust_order INNER JOIN customer ON customer.cust_id = cust_order.cust_id ORDER BY order_id;
+
+-- #2
+SELECT cust_order.order_id,cust_order.order_date,cust_order.order_source_id,order_source.source_desc,customer.first,customer.last FROM ((cust_order INNER JOIN customer ON customer.cust_id = cust_order.cust_id) INNER JOIN order_source ON order_source.order_source_id = cust_order.order_source_id);
+
+-- #3
+SELECT shipment_line.shipment_id,shipment_line.inv_id,shipment_line.ship_quantity,shipment.date_expected,shipment_line.date_received FROM shipment_line INNER JOIN shipment ON shipment_line.shipment_id = shipment.shipment_id;
+
+-- #4
+SELECT shipment_line.shipment_id,inventory.item_id,inventory.item_size,inventory.color,inventory.price FROM inventory INNER JOIN shipment_line ON shipment_line.inv_id = inventory.inv_id WHERE inventory.color LIKE "%ight%";
+
+-- #5
+SELECT DISTINCT inventory.item_id,item.item_desc,inventory.item_size,inventory.price FROM inventory INNER JOIN item ON inventory.item_id = item.item_id WHERE item_size = 'M';
+
+-- #6
+SELECT customer.last,cust_order.order_id,cust_order.order_date,order_source.source_desc FROM ((customer INNER JOIN cust_order ON customer.cust_id = cust_order.cust_id) INNER JOIN order_source ON order_source.order_source_id = cust_order.order_source_id) WHERE order_date > '2003-05-31';
+
+-- #7
+SELECT inv_id,item_size,color,price FROM inventory WHERE price = (SELECT MAX(price) FROM inventory);
+
+-- #8
+SELECT DISTINCT order_id FROM cust_order WHERE order_id in (SELECT order_id FROM order_line ol, inventory i WHERE ol.inv_id = i.inv_id AND color LIKE '%u%e');
+
+-- #9
+SELECT inventory.inv_id,inventory.item_id,inventory.color,inventory.qoh FROM inventory WHERE qoh IN(SELECT MAX(qoh) FROM inventory);
+
+-- #10
+SELECT DISTINCT meth_pmt FROM cust_order;
+
+-- #11
+SELECT inventory.inv_id,inventory.item_id,inventory.color,inventory.qoh,'Largest' AS comments FROM inventory WHERE qoh IN(SELECT MAX(qoh) FROM inventory)
+UNION
+SELECT inventory.inv_id,inventory.item_id,inventory.color,inventory.qoh,'Smallest' AS comments FROM inventory WHERE qoh IN(SELECT MIN(qoh) FROM inventory);
+
+-- # Bonus 1
+SELECT i.item_id, item_desc, SUM(qoh) AS totalQuantity FROM item i INNER JOIN inventory inv ON i.item_id = inv.item_id GROUP BY item_id HAVING SUM(qoh) = (SELECT SUM(qoh) AS a FROM inventory group by item_id order BY A DESC LIMIT 1);
+
+-- # Bonus 2
+SELECT i.item_id, item_desc, SUM(qoh) AS totalQuantity FROM item i INNER JOIN inventory inv ON i.item_id = inv.item_id GROUP BY item_id HAVING SUM(qoh) = (SELECT SUM(qoh) AS a FROM inventory group by item_id order BY A LIMIT 1);
